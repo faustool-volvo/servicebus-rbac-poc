@@ -21,7 +21,8 @@ public class ServiceBusRBACPOCFunction {
     @Funq
     public FunctionResponse send(ServiceBusParams params) {
         try {
-            return FunctionResponse.success(sbus.send(params));
+            String message = sbus.send(params);
+            return FunctionResponse.success(message);
         } catch (Exception e) {
             return FunctionResponse.error(e);
         }
@@ -29,6 +30,9 @@ public class ServiceBusRBACPOCFunction {
 
     @Funq
     public FunctionResponse receive(ServiceBusParams params) {
+        if (params.getSubscription() == null || params.getSubscription().trim().isEmpty()) {
+            return FunctionResponse.error("Missing subscription");
+        }
         try {
             return FunctionResponse.success(sbus.receive(params));
         } catch (Exception e) {

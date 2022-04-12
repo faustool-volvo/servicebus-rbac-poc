@@ -28,6 +28,10 @@ public final class FunctionResponse {
         return new FunctionResponse(true, messages);
     }
 
+    public static FunctionResponse error(String message) {
+        return new FunctionResponse(false, message);
+    }
+
     public static FunctionResponse error(Exception error) {
         try (var sw = new StringWriter()) {
             error.printStackTrace(new PrintWriter(sw));
