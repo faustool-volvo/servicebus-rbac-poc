@@ -8,6 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
+import com.azure.identity.ManagedIdentityCredentialBuilder;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusMessage;
 import com.github.javafaker.Faker;
@@ -16,11 +17,21 @@ import com.github.javafaker.Faker;
 public class ServiceBusHelper {
 
     protected TokenCredential getCredential(ServiceBusParams params) {
-        return new ClientSecretCredentialBuilder()
-                .clientId(params.getClientId())
-                .tenantId(params.getTenantId())
-                .clientSecret(params.getClientSecret())
-                .build();
+
+        switch (params.getAccountType()) {
+            case ServicePrincipal:
+                return new ClientSecretCredentialBuilder()
+                        .clientId(params.getClientId())
+                        .tenantId(params.getTenantId())
+                        .clientSecret(params.getClientSecret())
+                        .build();
+            case ManagedIdentity:
+                return new ManagedIdentityCredentialBuilder()
+                        .clientId(params.getClientId())
+                        .build();
+            default:
+                throw new IllegalArgumentException("Invalid account type: " + params.getAccountType().name());
+        }
     }
 
     public String send(ServiceBusParams params) {

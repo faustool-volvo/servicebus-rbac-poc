@@ -2,6 +2,10 @@ package com.vfs.ea.poc.sbusfunc;
 
 public class ServiceBusParams {
 
+    public static enum AccountType {
+        ServicePrincipal, ManagedIdentity
+    }
+
     private String message;
 
     private String namespace;
@@ -15,6 +19,8 @@ public class ServiceBusParams {
     private String clientSecret;
 
     private String tenantId;
+
+    private AccountType accountType = AccountType.ServicePrincipal;
 
 
     public String getNamespace() {
@@ -71,6 +77,14 @@ public class ServiceBusParams {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(AccountType accountType) {
+        this.accountType = accountType;
     }
 
     
