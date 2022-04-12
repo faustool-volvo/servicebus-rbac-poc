@@ -19,10 +19,10 @@
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 
     <azure.functions.maven.plugin.version>1.9.1</azure.functions.maven.plugin.version>
-    <functionAppName>servicebus-rbac-poc</functionAppName>
+    <functionAppName>servicebus-rbac-fausto</functionAppName>
     <functionAppRegion>eastus2</functionAppRegion>
     <functionResourceGroup>ServiceBusPOC</functionResourceGroup>
-    <function>serivcebusrbacpoc</function>
+    <function>serivcebusrbacfausto</function>
     <functionSubscription>14215c02-f7b7-433b-bbaa-73c66e93920f</functionSubscription>
     <stagingDirectory>${project.build.directory}/azure-functions/${functionAppName}</stagingDirectory>
     <quarkus.package.type>uber-jar</quarkus.package.type>
