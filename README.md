@@ -27,6 +27,12 @@ Set the default subscription:
 az account set --subscription "{your subscription id}"
 ```
 
+Prepare an object to store the items created:
+```powershell
+$Poc = @{}
+$Poc.AzureSubscription = az account show | ConvertFrom-Json
+```
+
 Confirm you have the correct subscription:
 ```powershell
 az account show
@@ -34,7 +40,7 @@ az account show
 
 Create the execution group for the POC:
 ```powershell
-$Group = az group create `
+$Poc.Group = az group create `
     --name "ServiceBusPOC" `
     --location "eastus2" | ConvertFrom-Json
 ```
@@ -42,58 +48,58 @@ $Group = az group create `
 
 Create the Service Bus Namespace:
 ```powershell
-$Namespace = az servicebus namespace create `
+$Poc.Namespace = az servicebus namespace create `
     --name "Contracts" `
     --sku standard `
-    --location $Group.Location `
-    --resource-group $Group.Name | ConvertFrom-Json
+    --location $Poc.Group.Location `
+    --resource-group $Poc.Group.Name | ConvertFrom-Json
 ```
 
 Create the topics:
 ```powershell
-$TopicA = az servicebus topic create `
+$Poc.TopicA = az servicebus topic create `
     --name "ContractsA" `
-    --namespace-name $Namespace.Name `
-    --resource-group $Group.Name | ConvertFrom-Json
+    --namespace-name $Poc.Namespace.Name `
+    --resource-group $Poc.Group.Name | ConvertFrom-Json
 ```
 ```powershell
-$TopicB = az servicebus topic create `
+$Poc.TopicB = az servicebus topic create `
     --name "ContractsB" `
-    --namespace-name $Namespace.Name `
-    --resource-group $Group.Name | ConvertFrom-Json
+    --namespace-name $Poc.Namespace.Name `
+    --resource-group $Poc.Group.Name | ConvertFrom-Json
 ```
 
 Create the subscriptions:
 ```powershell
-$SubscriptionA1 = az servicebus topic subscription create `
+$Poc.SubscriptionA1 = az servicebus topic subscription create `
     --name "ConsumerA1" `
-    --topic-name $TopicA.Name `
-    --namespace-name $Namespace.Name `
-    --resource-group $GroupName `
+    --topic-name $Poc.TopicA.Name `
+    --namespace-name $Poc.Namespace.Name `
+    --resource-group $Poc.GroupName `
     --max-delivery-count 1 | ConvertFrom-Json
 ```
 ```powershell
-$SubscriptionA2 = az servicebus topic subscription create `
+$Poc.SubscriptionA2 = az servicebus topic subscription create `
     --name "ConsumerA2" `
-    --topic-name $TopicA.Name `
-    --namespace-name $Namespace.Name `
-    --resource-group $GroupName `
+    --topic-name $Poc.TopicA.Name `
+    --namespace-name $Poc.Namespace.Name `
+    --resource-group $Poc.GroupName `
     --max-delivery-count 1 | ConvertFrom-Json
 ```
 ```powershell
-$SubscriptionB1 = az servicebus topic subscription create `
+$Poc.SubscriptionB1 = az servicebus topic subscription create `
     --name "ConsumerB1" `
-    --topic-name $TopicB.Name `
-    --namespace-name $Namespace.Name `
-    --resource-group $GroupName `
+    --topic-name $Poc.TopicB.Name `
+    --namespace-name $Poc.Namespace.Name `
+    --resource-group $Poc.GroupName `
     --max-delivery-count 1 | ConvertFrom-Json
 ```
 ```powershell
-$SubscriptionB2 = az servicebus topic subscription create `
+$Poc.SubscriptionB2 = az servicebus topic subscription create `
     --name "ConsumerB2" `
-    --topic-name $TopicB.Name `
-    --namespace-name $Namespace.Name `
-    --resource-group $GroupName `
+    --topic-name $Poc.TopicB.Name `
+    --namespace-name $Poc.Namespace.Name `
+    --resource-group $Poc.GroupName `
     --max-delivery-count 1 | ConvertFrom-Json
 ```
 
@@ -102,53 +108,53 @@ Create the app registrations and service principals:
 Consumer B2 is a managed identity thus it does not have a password.
 ```powershell
 # Publisher
-$PublisherApp = az ad app create `
+$Poc.PublisherApp = az ad app create `
     --display-name "SBUS-RBAC-POC-$env:USERNAME-Contracts-Publisher" `
     --available-to-other-tenants false | ConvertFrom-Json
-$PublisherPrincipal = az ad sp create-for-rbac `
-    --name $PublisherApp.DisplayName `
+$Poc.PublisherPrincipal = az ad sp create-for-rbac `
+    --name $Poc.PublisherApp.DisplayName `
     --role Reader `
-    --scopes $Group.Id | ConvertFrom-Json
-$PublisherPrincipal.Password > "$env:USERPROFILE\sbus-poc-publisher-pwd.txt"
+    --scopes $Poc.Group.Id | ConvertFrom-Json
+$Poc.PublisherPrincipal.Password > "$env:USERPROFILE\sbus-poc-publisher-pwd.txt"
 ```
 ```powershell
 # Consumer A1
-$ConsumerA1App = az ad app create `
+$Poc.ConsumerA1App = az ad app create `
     --display-name "SBUS-RBAC-POC-$env:USERNAME-Consumer-A1" `
     --available-to-other-tenants false | ConvertFrom-Json
-$ConsumerA1Principal = az ad sp create-for-rbac `
-    --name $ConsumerA1App.DisplayName `
+$Poc.ConsumerA1Principal = az ad sp create-for-rbac `
+    --name $Poc.ConsumerA1App.DisplayName `
     --role Reader `
-    --scopes $Group.Id | ConvertFrom-Json
-$ConsumerA1Principal.Password > "$env:USERPROFILE\sbus-poc-consumer-a1-pwd.txt"
+    --scopes $Poc.Group.Id | ConvertFrom-Json
+$Poc.ConsumerA1Principal.Password > "$env:USERPROFILE\sbus-poc-consumer-a1-pwd.txt"
 ```
 ```powershell
 # Consumer A2
-$ConsumerA2App = az ad app create `
+$Poc.ConsumerA2App = az ad app create `
     --display-name "SBUS-RBAC-POC-$env:USERNAME-Consumer-A2" `
     --available-to-other-tenants false | ConvertFrom-Json
-$ConsumerA2Principal = az ad sp create-for-rbac `
-    --name $ConsumerA2App.DisplayName `
+$Poc.ConsumerA2Principal = az ad sp create-for-rbac `
+    --name $Poc.ConsumerA2App.DisplayName `
     --role Reader `
-    --scopes $Group.Id | ConvertFrom-Json
-$ConsumerA2Principal.Password > "$env:USERPROFILE\sbus-poc-consumer-a2-pwd.txt"
+    --scopes $Poc.Group.Id | ConvertFrom-Json
+$Poc.ConsumerA2Principal.Password > "$env:USERPROFILE\sbus-poc-consumer-a2-pwd.txt"
 ```
 ```powershell
 # Consumer B1
-$ConsumerB1App = az ad app create `
+$Poc.ConsumerB1App = az ad app create `
     --display-name "SBUS-RBAC-POC-$env:USERNAME-Consumer-B1" `
     --available-to-other-tenants false | ConvertFrom-Json
-$ConsumerB1Principal = az ad sp create-for-rbac `
-    --name $ConsumerB1App.DisplayName `
+$Poc.ConsumerB1Principal = az ad sp create-for-rbac `
+    --name $Poc.ConsumerB1App.DisplayName `
     --role Reader `
-    --scopes $Group.Id | ConvertFrom-Json
-$ConsumerB1Principal.Password > "$env:USERPROFILE\sbus-poc-consumer-b1-pwd.txt"
+    --scopes $Poc.Group.Id | ConvertFrom-Json
+$Poc.ConsumerB1Principal.Password > "$env:USERPROFILE\sbus-poc-consumer-b1-pwd.txt"
 ```
 ```powershell
 # Consumer B2
-$ConsumerB2Identity = az identity create `
+$Poc.ConsumerB2Identity = az identity create `
     --name "Consumer-B2" `
-    --resource-group $Group.Name | ConvertFrom-Json
+    --resource-group $Poc.Group.Name | ConvertFrom-Json
 ```
 
 Assign roles:
@@ -160,41 +166,41 @@ $DataReceiverRole="4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0"
 ```powershell
 # Publisher can send to TopicA and TopicB
 az role assignment create `
-    --assignee $PublisherPrincipal.AppId `
+    --assignee $Poc.PublisherPrincipal.AppId `
     --role $DataSenderRole `
-    --scope $TopicA.Id
+    --scope $Poc.TopicA.Id
 az role assignment create `
-    --assignee $PublisherPrincipal.AppId `
+    --assignee $Poc.PublisherPrincipal.AppId `
     --role $DataSenderRole `
-    --scope $TopicB.Id
+    --scope $Poc.TopicB.Id
 ```
 ```powershell
 # ConsumerA1 can receive from SubscriptionA1
 az role assignment create `
-    --assignee $ConsumerA1Principal.AppId `
+    --assignee $Poc.ConsumerA1Principal.AppId `
     --role $DataReceiverRole `
-    --scope $SubscriptionA1.Id
+    --scope $Poc.SubscriptionA1.Id
 ```
 ```powershell
 # ConsumerA2 can receive from SubscriptionA2
 az role assignment create `
-    --assignee $ConsumerA2Principal.AppId `
+    --assignee $Poc.ConsumerA2Principal.AppId `
     --role $DataReceiverRole `
-    --scope $SubscriptionA2.Id
+    --scope $Poc.SubscriptionA2.Id
 ```
 ```powershell
 # ConsumerB1 can receive from SubscriptionB1
 az role assignment create `
-    --assignee $ConsumerB1Principal.AppId `
+    --assignee $Poc.ConsumerB1Principal.AppId `
     --role $DataReceiverRole `
-    --scope $SubscriptionB1.Id
+    --scope $Poc.SubscriptionB1.Id
 ```
 ```powershell
 # ConsumerB2 can receive from SubscriptionB2
 az role assignment create `
-    --assignee $ConsumerB2Identity.PrincipalId `
+    --assignee $Poc.ConsumerB2Identity.PrincipalId `
     --role $DataReceiverRole `
-    --scope $SubscriptionB2.Id
+    --scope $Poc.SubscriptionB2.Id
 ```
 
 # Running
@@ -207,12 +213,15 @@ mvn quarkus:dev
 
 Or it can be deployed to Microsoft Azure as a Function:
 ```powershell
+$Poc.FunctionName="the function name" `
+$Poc.FunctionAppName="the function app name" `
+
 mvn clean install azure-functions:deploy `
-    -DfunctionAppName="the function app name" `
-    -DfunctionAppRegion="the target region" `
-    -DfunctionResourceGroup="the target resource group" `
-    -Dfunction="the function name" `
-    -DfunctionSubscription="the Azure subscription id"
+    -Dfunction=$Poc.FunctionName
+    -DfunctionAppName=$Poc.FunctionAppName `
+    -DfunctionAppRegion=$Poc.Group.Location `
+    -DfunctionResourceGroup=$Poc.Group.Name `
+    -DfunctionSubscription=$Poc.AzureSubscription.Id
 ```
 
 # Testing

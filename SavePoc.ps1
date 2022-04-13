@@ -1,0 +1,1 @@
+$Poc | ConvertTo-Json > .pocdata
