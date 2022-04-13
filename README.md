@@ -228,7 +228,7 @@ Notes for the examples:
 
 The `send` endpoint will send one message to the specified topic with a given content. However, the function will use the [JavaFaker](https://github.com/DiUS/java-faker) library to send messages with random [Chuck Norris Facts](https://en.wikipedia.org/wiki/Chuck_Norris_facts) if the `message` field is missing. Have fun 😄.
 
-To send a message, make an HTTP POST calls to `{baseUrl}/api/send` with the following contents:
+To send a message, make an HTTP POST call to `{baseUrl}/api/send` with the following contents:
 ```json
 {
     "message": "message contents",
@@ -246,7 +246,7 @@ The response will echo the body of the message sent.
 
 The `receive` endpoint will read all messages available for a given subscription and the `messages` field in the response will contain their contents, in the order they were received.
 
-To receive messages using Service Principals, make an HTTP POST calls to `{baseUrl}/api/receive` with the following contents:
+To receive messages using Service Principals, make an HTTP POST call to `{baseUrl}/api/receive` with the following contents:
 ```json
 {
     "topicName": "ContractsA or ContractsB",
@@ -256,7 +256,7 @@ To receive messages using Service Principals, make an HTTP POST calls to `{baseU
     "tenantId": "azure tenant id"
 }
 ```
-To receive messages using Managed Identities, make an HTTP POST calls to `{baseUrl}/api/receive` with the following contents:
+To receive messages using Managed Identities, make an HTTP POST call to `{baseUrl}/api/receive` with the following contents:
 ```json
 {
     "topicName": "ContractsA or ContractsB",
