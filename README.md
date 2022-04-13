@@ -221,14 +221,14 @@ Notes for the examples:
 * `{baseUrl}` is the HTTP location of your service, e.g. `http://localhost:8080` if you're running locally or `https://{functionAppName}.azurewebsites.net` if you're running as an Azure Function.  
 * To find the tenant id, run the command: `(az account show | ConvertFrom-Json).TenantId`  
 * For code simplicity, all responses will return HTTP Status `200`. Therefore, the reponses will always contain a `success` boolean field indicating success (`true`) or failure (`false`) and a `messages` field array with additional information.
-* The function also supports HTTP GETs with the request json fields as query parameters (e.g. `{baseUrl}/api/send?clientId=value&clientSecret=value...`), but for readability the examples will focus on HTTP POST calls only.
+* The function also supports HTTP GET calls with the request json fields as query parameters (e.g. `{baseUrl}/api/send?clientId=value&clientSecret=value...`), but for readability the examples will focus on HTTP POST calls only.
 * Replace the placeholder values in the examples with the proper contents.
 
 ## Sending messages
 
 The `send` endpoint will send one message to the specified topic with a given content. However, the function will use the [JavaFaker](https://github.com/DiUS/java-faker) library to send messages with random [Chuck Norris Facts](https://en.wikipedia.org/wiki/Chuck_Norris_facts) if the `message` field is missing. Have fun 😄.
 
-To send a message, make an HTTP POST to `{baseUrl}/api/send` with the following contents:
+To send a message, make an HTTP POST calls to `{baseUrl}/api/send` with the following contents:
 ```json
 {
     "message": "message contents",
@@ -246,7 +246,7 @@ The response will echo the body of the message sent.
 
 The `receive` endpoint will read all messages available for a given subscription and the `messages` field in the response will contain their contents, in the order they were received.
 
-To receive messages using Service Principals, make an HTTP POST to `{baseUrl}/api/receive` with the following contents:
+To receive messages using Service Principals, make an HTTP POST calls to `{baseUrl}/api/receive` with the following contents:
 ```json
 {
     "topicName": "ContractsA or ContractsB",
@@ -256,7 +256,7 @@ To receive messages using Service Principals, make an HTTP POST to `{baseUrl}/ap
     "tenantId": "azure tenant id"
 }
 ```
-To receive messages using Managed Identities, make an HTTP POST to `{baseUrl}/api/receive` with the following contents:
+To receive messages using Managed Identities, make an HTTP POST calls to `{baseUrl}/api/receive` with the following contents:
 ```json
 {
     "topicName": "ContractsA or ContractsB",
