@@ -1,0 +1,1 @@
+return Get-Content .pocdata | ConvertFrom-Json

@@ -33,7 +33,8 @@ $Poc = @{}
 $Poc.AzureSubscription = az account show | ConvertFrom-Json
 ```
 
-> As you progress through this guide, it is recommended to execute the `SavePoc.ps1` script after each command to save your progress into the `.pocdata` file.
+> As you progress through this guide, it is recommended to execute the `.\SavePoc.ps1` script after each command to save your progress into the `.pocdata` file.  
+> To resume work, execute the command `$Poc = .\ReadPoc.ps1`
 
 Confirm you have the correct subscription:
 ```powershell
@@ -51,7 +52,7 @@ $Poc.Group = az group create `
 Create the Service Bus Namespace:
 ```powershell
 $Poc.Namespace = az servicebus namespace create `
-    --name "Contracts" `
+    --name "Contracts-$env:USERNAME" `
     --sku standard `
     --location $Poc.Group.Location `
     --resource-group $Poc.Group.Name | ConvertFrom-Json
@@ -77,7 +78,7 @@ $Poc.SubscriptionA1 = az servicebus topic subscription create `
     --name "ConsumerA1" `
     --topic-name $Poc.TopicA.Name `
     --namespace-name $Poc.Namespace.Name `
-    --resource-group $Poc.GroupName `
+    --resource-group $Poc.Group.Name `
     --max-delivery-count 1 | ConvertFrom-Json
 ```
 ```powershell
@@ -85,7 +86,7 @@ $Poc.SubscriptionA2 = az servicebus topic subscription create `
     --name "ConsumerA2" `
     --topic-name $Poc.TopicA.Name `
     --namespace-name $Poc.Namespace.Name `
-    --resource-group $Poc.GroupName `
+    --resource-group $Poc.Group.Name `
     --max-delivery-count 1 | ConvertFrom-Json
 ```
 ```powershell
@@ -93,7 +94,7 @@ $Poc.SubscriptionB1 = az servicebus topic subscription create `
     --name "ConsumerB1" `
     --topic-name $Poc.TopicB.Name `
     --namespace-name $Poc.Namespace.Name `
-    --resource-group $Poc.GroupName `
+    --resource-group $Poc.Group.Name `
     --max-delivery-count 1 | ConvertFrom-Json
 ```
 ```powershell
@@ -101,23 +102,20 @@ $Poc.SubscriptionB2 = az servicebus topic subscription create `
     --name "ConsumerB2" `
     --topic-name $Poc.TopicB.Name `
     --namespace-name $Poc.Namespace.Name `
-    --resource-group $Poc.GroupName `
+    --resource-group $Poc.Group.Name `
     --max-delivery-count 1 | ConvertFrom-Json
 ```
 
 Create the app registrations and service principals:
-> Because you won't be able to retrieve the passwords again later, the commands below save them in text files inside your home directory.  
-Consumer B2 is a managed identity thus it does not have a password.
 ```powershell
 # Publisher
 $Poc.PublisherApp = az ad app create `
-    --display-name "SBUS-RBAC-POC-$env:USERNAME-Contracts-Publisher" `
+    --display-name "SBUS-RBAC-POC-$env:USERNAME-Publisher" `
     --available-to-other-tenants false | ConvertFrom-Json
 $Poc.PublisherPrincipal = az ad sp create-for-rbac `
     --name $Poc.PublisherApp.DisplayName `
     --role Reader `
     --scopes $Poc.Group.Id | ConvertFrom-Json
-$Poc.PublisherPrincipal.Password > "$env:USERPROFILE\sbus-poc-publisher-pwd.txt"
 ```
 ```powershell
 # Consumer A1
@@ -128,7 +126,6 @@ $Poc.ConsumerA1Principal = az ad sp create-for-rbac `
     --name $Poc.ConsumerA1App.DisplayName `
     --role Reader `
     --scopes $Poc.Group.Id | ConvertFrom-Json
-$Poc.ConsumerA1Principal.Password > "$env:USERPROFILE\sbus-poc-consumer-a1-pwd.txt"
 ```
 ```powershell
 # Consumer A2
@@ -139,7 +136,6 @@ $Poc.ConsumerA2Principal = az ad sp create-for-rbac `
     --name $Poc.ConsumerA2App.DisplayName `
     --role Reader `
     --scopes $Poc.Group.Id | ConvertFrom-Json
-$Poc.ConsumerA2Principal.Password > "$env:USERPROFILE\sbus-poc-consumer-a2-pwd.txt"
 ```
 ```powershell
 # Consumer B1
@@ -150,7 +146,6 @@ $Poc.ConsumerB1Principal = az ad sp create-for-rbac `
     --name $Poc.ConsumerB1App.DisplayName `
     --role Reader `
     --scopes $Poc.Group.Id | ConvertFrom-Json
-$Poc.ConsumerB1Principal.Password > "$env:USERPROFILE\sbus-poc-consumer-b1-pwd.txt"
 ```
 ```powershell
 # Consumer B2
@@ -233,6 +228,7 @@ Notes for the examples:
 * To find the tenant id, run the command: `(az account show | ConvertFrom-Json).TenantId`  
 * For code simplicity, all responses will return HTTP Status `200`. Therefore, the reponses will always contain a `success` boolean field indicating success (`true`) or failure (`false`) and a `messages` field array with additional information.
 * The function also supports HTTP GET calls with the request json fields as query parameters (e.g. `{baseUrl}/api/send?clientId=value&clientSecret=value...`), but for readability the examples will focus on HTTP POST calls only.
+* The Principal objects stored inside the $Poc variable contain the values for `clientId` and `clientSecret` as `AppId` and `Password`, respectively (e.g. `$Poc.PublisherPrincipal.AppId`). For the managed identity `ConsumerB2Identity`, the value of `clientId` is `PrincipalId`.
 * Replace the placeholder values in the examples with the proper contents.
 
 ## Sending messages
@@ -275,4 +271,19 @@ To receive messages using Managed Identities, make an HTTP POST call to `{baseUr
     "accountType": "ManagedIdentity",
     "clientId": "publisher appId"
 }
+```
+
+# Cleaning up
+
+To cleanup the items created on Azure for this POC (a good practice to save costs), execute the commands bellow:
+```powershell
+# Delete the principals
+az ad sp delete --id $Poc.PublisherPrincipal.AppId
+az ad sp delete --id $Poc.ConsumerA1Principal.AppId
+az ad sp delete --id $Poc.ConsumerA2Principal.AppId
+az ad sp delete --id $Poc.ConsumerB1Principal.AppId
+```
+```powershell
+# Delete the resource group
+az group delete --resource-group $Poc.Group.Name
 ```
