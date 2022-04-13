@@ -1,1 +1,1 @@
-$Poc | ConvertTo-Json > .pocdata
+$Poc | ConvertTo-Json -Depth 5 > .pocdata
