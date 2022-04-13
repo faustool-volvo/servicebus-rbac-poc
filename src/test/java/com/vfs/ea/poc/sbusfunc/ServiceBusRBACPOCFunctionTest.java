@@ -1,12 +1,11 @@
 package com.vfs.ea.poc.sbusfunc;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Arrays;
 
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -27,7 +26,7 @@ public class ServiceBusRBACPOCFunctionTest {
                 .statusCode(200)
                 .contentType("application/json")
                 .body("success", equalTo(true))
-                .body("messages[0]", Matchers.containsString("success!"));
+                .body("messages[0]", containsString("success!"));
     }
 
     @Test
@@ -37,8 +36,18 @@ public class ServiceBusRBACPOCFunctionTest {
                 .statusCode(200)
                 .contentType("application/json")
                 .body("success", equalTo(false))
-                .body("messages[0]", Matchers.containsString("some error message"));
+                .body("messages[0]", containsString("some error message"));
     }
+
+    @Test
+    public void testReceiveNoSubscription() {
+        RestAssured.when().get("/receive").then()
+                .statusCode(200)
+                .contentType("application/json")
+                .body("success", equalTo(false))
+                .body("messages[0]", equalTo("Missing subscription"));
+    }
+
 
     @Test
     public void testReceive() {
@@ -47,8 +56,8 @@ public class ServiceBusRBACPOCFunctionTest {
                 .statusCode(200)
                 .contentType("application/json")
                 .body("success", equalTo(true))
-                .body("messages[0]", Matchers.containsString("message 1"))
-                .body("messages[1]", Matchers.containsString("message 2"));
+                .body("messages[0]", equalTo("message 1"))
+                .body("messages[1]", equalTo("message 2"));
     }
 
     @Test
@@ -58,6 +67,6 @@ public class ServiceBusRBACPOCFunctionTest {
                 .statusCode(200)
                 .contentType("application/json")
                 .body("success", equalTo(false))
-                .body("messages[0]", Matchers.containsString("some error message"));
+                .body("messages[0]", containsString("some error message"));
     }
 }
