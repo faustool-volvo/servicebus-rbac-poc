@@ -33,6 +33,8 @@ $Poc = @{}
 $Poc.AzureSubscription = az account show | ConvertFrom-Json
 ```
 
+> As you progress through this guide, it is recommended to execute the `SavePoc.ps1` script after each command to save your progress into the `.pocdata` file.
+
 Confirm you have the correct subscription:
 ```powershell
 az account show

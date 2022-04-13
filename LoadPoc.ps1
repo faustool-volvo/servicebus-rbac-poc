@@ -1,0 +1,1 @@
+$Poc = Get-Content .pocdata | ConvertFrom-Json
