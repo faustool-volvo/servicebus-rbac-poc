@@ -221,7 +221,7 @@ Notes for the examples:
 * `{baseUrl}` is the HTTP location of your service, e.g. `http://localhost:8080` if you're running locally or `https://{functionAppName}.azurewebsites.net` if you're running as an Azure Function.  
 * To find the tenant id, run the command: `(az account show | ConvertFrom-Json).TenantId`  
 * Replace the placeholder values in the json examples with the proper contents.
-* For code simplicity, all responses will return HTTP Status `200` regardless of success or error. Therefore, the reponses will always contain a `success` boolean field indicating success (`true`) or failure (`false`) and a `messages` field array with additional information.
+* For code simplicity, all responses will return HTTP Status `200`. Therefore, the reponses will always contain a `success` boolean field indicating success (`true`) or failure (`false`) and a `messages` field array with additional information.
 * The function also supports HTTP GETs with the request json fields as query parameters (e.g. `{baseUrl}/api/send?clientId=value&clientSecret=value...`), but for readability the examples will focus on HTTP POST calls only.
 
 
