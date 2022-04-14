@@ -22,7 +22,6 @@
     <functionAppName>${env.SBUS_POC_FUNCTION_APP_NAME}</functionAppName>
     <functionAppRegion>${env.SBUS_POC_FUNCTION_APP_REGION}</functionAppRegion>
     <functionResourceGroup>${env.SBUS_POC_FUNCTION_APP_GROUP}</functionResourceGroup>
-    <function>${env.SBUS_POC_FUNCTION_NAME}</function>
     <functionSubscription>${env.SBUS_POC_FUNCTION_SUBSCRIPTION}</functionSubscription>
     <stagingDirectory>${project.build.directory}/azure-functions/${functionAppName}</stagingDirectory>
     <quarkus.package.type>uber-jar</quarkus.package.type>

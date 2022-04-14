@@ -14,8 +14,8 @@ public class ServiceBusRBACPOCFunction {
     }
 
     @Funq
-    public String funqyHello() {
-        return "hello funqy";
+    public String hello() {
+        return "Hi!";
     }
 
     @Funq

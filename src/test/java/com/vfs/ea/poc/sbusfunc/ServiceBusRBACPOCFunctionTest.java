@@ -20,6 +20,15 @@ public class ServiceBusRBACPOCFunctionTest {
     ServiceBusHelper sbus;
 
     @Test
+    public void testHello() {
+        RestAssured.when().get("/hello").then()
+                .statusCode(200)
+                .contentType("application/json")
+                .body(containsString("Hi!"));
+    }
+
+
+    @Test
     public void testSend() {
         Mockito.when(sbus.send(any())).thenReturn("success!");
         RestAssured.when().get("/send").then()

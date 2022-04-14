@@ -1,5 +1,6 @@
 package com.vfs.ea.poc.sbusfunc;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Locale;
@@ -42,33 +43,34 @@ public class ServiceBusHelper {
         } else {
             message = params.getMessage();
         }
-        var sender = new ServiceBusClientBuilder()
+        try (var sender = new ServiceBusClientBuilder()
                 .credential(this.getCredential(params))
                 .fullyQualifiedNamespace(params.getNamespace())
                 .sender()
                 .topicName(params.getTopicName())
-                .buildClient();
-        sender.sendMessage(new ServiceBusMessage(message));
+                .buildClient()) {
+            sender.sendMessage(new ServiceBusMessage(message));
+        }
         return message;
     }
 
     public Collection<String> receive(ServiceBusParams params) {
-        var receiver = new ServiceBusClientBuilder()
+        try (var receiver = new ServiceBusClientBuilder()
                 .credential(getCredential(params))
                 .fullyQualifiedNamespace(params.getNamespace())
                 .receiver()
                 .topicName(params.getTopicName())
                 .subscriptionName(params.getSubscription())
-                .buildClient();
+                .buildClient()) {
+            final var messages = new LinkedList<String>();
 
-        final var messages = new LinkedList<String>();
+            receiver.receiveMessages(Integer.MAX_VALUE, Duration.ofSeconds(1L)).forEach(m -> {
+                messages.add(m.getBody().toString());
+                receiver.complete(m);
+            });
 
-        receiver.receiveMessages(Integer.MAX_VALUE).forEach(m -> {
-            messages.add(m.getBody().toString());
-            receiver.complete(m);
-        });
-
-        return messages;
+            return messages;
+        }
     }
 
 }
