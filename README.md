@@ -7,6 +7,7 @@ The object of this program is to show how Azure Service Bus can be configured to
 * Apache Maven 3.8
 * Java JDK 11
 * Azure CLI
+* PowerShell 7
 
 # Building
 
